@@ -1,0 +1,137 @@
+<!-- index.html (Enhanced: PDF Download & Income) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YoungDesert - Financial Report</title>
+  <meta name="description" content="Growth Hub: Marketing strategies & comprehensive financial report tracker with detailed entries, income tracking, and PDF export.">
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <!-- html2canvas & jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <!-- Your main script -->
+  <script src="js/script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a href="Tracker.html" class="logo" aria-label="Growth Hub Home">YoungDesert</a>
+      <button class="nav-toggle" aria-label="Toggle menu">☰</button>
+      <nav class="site-nav" role="navigation">
+        <a href="main.html" >Home</a>
+        <a href="Tools.html" class="active">Tools</a>
+        <a href="strategy-seo.html">SEO</a>
+        <a href="strategy-email.html">Email</a>
+        <a href="blog.html">Blog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content" class="container" role="main">
+    <section class="hero">
+      <h1>Financial Report Dashboard</h1>
+      <p>Log and analyze your financial entries with descriptions, then export to CSV or PDF.</p>
+    </section>
+
+    <section id="budget-tracker" class="budget-tracker container">
+      <h2>Report Entry</h2>
+      <form id="tracker-form" class="tracker-form" aria-label="Report entry form">
+        <select id="item-category" required>
+          <option value="Income">Income</option>
+          <option value="Assets">Assets</option>
+          <option value="Liabilities">Liabilities</option>
+          <option value="Smart Savings">Smart Savings</option>
+          <option value="Investment">Investment</option>
+          <option value="Debt">Debt</option>
+        </select>
+        <div id="category-description" class="category-desc">Select a category to see its definition.</div>
+        <input type="text" id="item-desc" placeholder="Description (e.g., Emergency Fund)" required>
+        <input type="number" id="item-amount" placeholder="Amount" required>
+        <button type="submit">Add Entry</button>
+      </form>
+
+      <div class="tracker-controls">
+        <button id="clear-btn" type="button">Clear All</button>
+        <button id="download-btn" type="button">Download CSV</button>
+        <button id="download-pdf-btn" type="button">Download PDF</button>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="report-table" aria-label="Detailed financial report">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <th>Total Network</th>
+              <th></th>
+              <th id="net-worth">$0.00</th>
+            </tr>
+            <tr>
+              <th>Balance</th>
+              <th></th>
+              <th id="balance">$0.00</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="chart-wrapper">
+        <canvas id="budget-chart" aria-label="Financial distribution pie chart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <button id="back-to-top" aria-label="Back to top">↑</button>
+
+<!-- Modern Footer -->
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <h2>Young<span>Desert</span></h2>
+      <p>Empowering startups with actionable marketing insights.</p>
+    </div>
+
+    <nav class="footer-nav">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="strategy-seo.html">SEO</a></li>
+        <li><a href="strategy-email.html">Email Marketing</a></li>
+      </ul>
+    </nav>
+
+    <div class="footer-social">
+      <h3>Follow Us</h3>
+      <a href="#" aria-label="Facebook">📘</a>
+      <a href="#" aria-label="Twitter">🐦</a>
+      <a href="#" aria-label="LinkedIn">🔗</a>
+    </div>
+
+    <div class="footer-newsletter">
+      <h3>Newsletter</h3>
+      <form id="newsletter-form">
+        <input type="email" placeholder="Email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2025 YoungDesert. All rights reserved.</p>
+  </div>
+</footer>
+</body>
+</html>
