@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | YoungDesert</title>
+  <link rel="stylesheet" href="css/styles1.css"/>
+</head>
+<body class="dashboard-page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="dashboard.html" class="logo">YoungDesert</a>
+      <nav class="site-nav">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="#">Settings</a>
+      </nav>
+     <button id="logout-btn" class="btn btn-logout">Log Out</button>
+
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Dashboard</h1>
+      <p>Welcome, <span id="user-email"></span>!</p>
+    </section>
+
+    <!-- Quick Actions -->
+    <div class="guide-checklist">
+      <h2>Your Quick Actions</h2>
+      <ul>
+        <li><a href="#">View Profile</a></li>
+        <li><a href="#">Manage Subscriptions</a></li>
+        <li><a href="#">Account Settings</a></li>
+      </ul>
+    </div>
+
+    <!-- Uploaded Videos Section -->
+    <section class="video-dashboard">
+      <h2>Uploaded Videos</h2>
+      <div id="video-list" class="video-list">
+        <!-- Videos will be dynamically inserted here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Auth and dashboard logic -->
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

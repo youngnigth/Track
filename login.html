@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | YoungDesert</title>
+  <link rel="stylesheet" href="css/styles1.css"/>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="main.html" class="logo">YoungDesert</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Welcome Back</h1>
+      <p>Please log in to continue</p>
+      <form id="login-form" style="max-width: 360px; margin: 2rem auto; display: grid; gap: 1rem;">
+        <input type="email" name="email" placeholder="Email" required
+               style="padding:0.75rem; border:1px solid #ddd; border-radius:var(--radius);" />
+        <input type="password" name="password" placeholder="Password" required
+               style="padding:0.75rem; border:1px solid #ddd; border-radius:var(--radius);" />
+        <button type="submit" class="btn btn-login">Log In</button>
+
+      </form>
+       <!--<p style="text-align:center; margin-top:1rem;">
+ Don’t have an account? <a href="register.html">Register here</a> 
+</p> -->
+
+    </section>
+  </main>
+
+  <!-- Auth logic -->
+  <script src="js/auth.js"></script>
+</body>
+</html>
