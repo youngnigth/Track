@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Investment Portfolio Calendar (Local)</title>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #1e90ff;
+      --bg: #f5f7fa;
+      --text: #23272f;
+      --card: #fff;
+      --gain-bg: #d4edda;
+      --gain-text: #155724;
+      --loss-bg: #f8d7da;
+      --loss-text: #721c24;
+      --radius: 12px;
+      --shadow: 0 2px 10px rgba(0,0,0,0.06);
+      --spacing: 1rem;
+      --font-base: 1rem;
+    }
+    body.dark {
+      --primary: #bb86fc;
+      --bg: #121212;
+      --text: #e0e0e0;
+      --card: #1e1e1e;
+      --shadow: 0 2px 10px rgba(255,255,255,0.1);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: var(--font-base);
+      transition: background .3s, color .3s;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    button {
+      cursor: pointer;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--card);
+      color: var(--text);
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.5rem;
+      box-shadow: var(--shadow);
+      font-size: 1.2rem;
+      z-index: 100;
+    }
+    .summary-section,
+    .calendar-section,
+    .chart-section {
+      background: var(--card);
+      padding: 1rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .summary-item strong {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .calendar-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .calendar-controls h3 {
+      flex: 1;
+      text-align: center;
+      margin: 0;
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+    }
+    table.calendar {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    td.today {
+      background: var(--primary);
+      color: #fff;
+      font-weight: bold;
+    }
+    td.has-entry {
+      background: #e6f7ff;
+      color: #0077b6;
+    }
+    td.gain {
+      background: var(--gain-bg);
+      color: var(--gain-text);
+    }
+    td.loss {
+      background: var(--loss-bg);
+      color: var(--loss-text);
+    }
+    td:hover {
+      background: #f1faff;
+    }
+    .chart-section canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 420px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: auto;
+    }
+    .modal label {
+      display: block;
+      margin-top: 1rem;
+    }
+    .modal input,
+    .modal select,
+    .modal textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #d3dbe3;
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .modal-btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    #futures-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    @media(max-width:800px) {
+      #futures-fields { grid-template-columns: 1fr; }
+      th, td { padding: 0.4rem; font-size: 0.9rem; }
+    }
+    @media(max-width:500px) {
+      th, td { padding: 0.3rem; font-size: 0.8rem; }
+      .calendar-controls h3 { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="theme-toggle">🌙</button>
+  <div class="container">
+    <h1>Investment Portfolio Calendar (Local)</h1>
+
+    <!-- Year Summary -->
+    <section class="summary-section">
+      <h2>Year Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Total Invested</strong><div id="sum-invested">$0.00</div></div>
+        <div class="summary-item"><strong>Personal Invested</strong><div id="sum-personal">$0.00</div></div>
+        <div class="summary-item"><strong>Company Invested</strong><div id="sum-company">$0.00</div></div>
+        <div class="summary-item"><strong>Total Current Value</strong><div id="sum-value">$0.00</div></div>
+      </div>
+    </section>
+
+    <!-- Calendar -->
+    <section class="calendar-section">
+      <div class="calendar-controls">
+        <button id="prev-month" class="btn">&larr;</button>
+        <h3 id="month-year"></h3>
+        <button id="next-month" class="btn">&rarr;</button>
+      </div>
+      <table class="calendar" id="calendar">
+        <thead>
+          <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Progress Chart -->
+    <section class="chart-section">
+      <h2>Progress Chart</h2>
+      <canvas id="progressChart" height="80"></canvas>
+    </section>
+  </div>
+
+  <!-- Entry Modal -->
+  <div id="modal-bg" class="modal-bg">
+    <div class="modal">
+      <h3 id="modal-date"></h3>
+
+      <!-- New: list of existing entries -->
+      <div id="existing-entries"></div>
+
+      <form id="entry-form" autocomplete="off">
+        <label>Investment Type
+          <select id="investment-type" required>
+            <option value="">Select…</option>
+            <option value="personal">Personal</option>
+            <option value="company">Company</option>
+            <option value="futures">Futures</option>
+            <option value="stock">Stock</option>
+            <option value="etf">ETF</option>
+            <option value="crypto">Crypto</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <div id="common-fields">
+          <label>Asset / Symbol<input type="text" id="entry-asset" required/></label>
+          <label>Amount Invested<input type="number" id="entry-amount" min="0" step="0.01" required/></label>
+          <label>Current Value<input type="number" id="entry-value" min="0" step="0.01"/></label>
+          <label>Notes<textarea id="entry-notes" rows="2"></textarea></label>
+        </div>
+        <div id="futures-fields" style="display:none;">
+          <label>Entry Price<input id="futures-entry" type="number" step="0.01"/></label>
+          <label>Exit Price<input id="futures-exit" type="number" step="0.01"/></label>
+          <label>Contracts<input id="futures-contracts" type="number" min="1" step="1"/></label>
+          <label>Commission<input id="futures-commission" type="number" min="0" step="0.01"/></label>
+          <label>Tick Value<input id="futures-tickvalue" type="number" min="0" step="0.01"/></label>
+          <label>P/L<input id="futures-pl" type="text" disabled/></label>
+        </div>
+        <div class="modal-btns">
+          <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn">Add Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ——— LocalStorage CRUD for arrays ———
+    function saveLocal(dateStr, entry) {
+      const store = JSON.parse(localStorage.getItem('entries')||'{}');
+      if (!Array.isArray(store[dateStr])) store[dateStr] = [];
+      store[dateStr].push(entry);
+      localStorage.setItem('entries', JSON.stringify(store));
+    }
+    function deleteLocalEntry(dateStr, index) {
+      const store = JSON.parse(localStorage.getItem('entries')||'{}');
+      if (Array.isArray(store[dateStr])) {
+        store[dateStr].splice(index, 1);
+        if (store[dateStr].length === 0) delete store[dateStr];
+        localStorage.setItem('entries', JSON.stringify(store));
+      }
+    }
+    function loadLocal() {
+      return JSON.parse(localStorage.getItem('entries')||'{}');
+    }
+
+    // App state
+    let serverData = {};
+    let selectedDate, currentMonth, currentYear;
+
+    function subscribeLocal() {
+      serverData = loadLocal();
+      renderCalendar(currentMonth, currentYear);
+      updateSummary();
+      renderChart();
+    }
+
+    // Theme toggle … (unchanged)
+    function applyTheme(theme) {
+      document.body.classList.toggle('dark', theme==='dark');
+    }
+    const initTheme = localStorage.getItem('theme')
+      || (window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    applyTheme(initTheme);
+    document.getElementById('theme-toggle').textContent = initTheme==='dark'?'🌞':'🌙';
+    document.getElementById('theme-toggle').onclick = ()=>{
+      const nt = document.body.classList.contains('dark')?'light':'dark';
+      applyTheme(nt);
+      localStorage.setItem('theme', nt);
+      document.getElementById('theme-toggle').textContent = nt==='dark'?'🌞':'🌙';
+    };
+
+    // Helpers
+    const pad = n=>n.toString().padStart(2,'0');
+    const ymd = date=>`${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+
+    // ——— Summary aggregates over ALL entries ———
+    function updateSummary() {
+      let total=0, personal=0, company=0, totalValue=0;
+      Object.values(serverData).forEach(arr => {
+        arr.forEach(e=>{
+          const amt = parseFloat(e.amount)||0;
+          const val = parseFloat(e.value)||0;
+          total+=amt;
+          if (e.type==='personal') personal+=amt;
+          if (e.type==='company') company+=amt;
+          totalValue+=val;
+        });
+      });
+      document.getElementById('sum-invested').textContent=`$${total.toFixed(2)}`;
+      document.getElementById('sum-personal').textContent=`$${personal.toFixed(2)}`;
+      document.getElementById('sum-company').textContent=`$${company.toFixed(2)}`;
+      document.getElementById('sum-value').textContent=`$${totalValue.toFixed(2)}`;
+    }
+
+    // ——— Calendar now aggregates daily P/L ———
+    function renderCalendar(month,year){
+      const tbody=document.querySelector('#calendar tbody');
+      tbody.innerHTML='';
+      const firstDay=new Date(year,month,1).getDay();
+      const daysInMonth=new Date(year,month+1,0).getDate();
+      let row=document.createElement('tr');
+      for(let i=0;i<firstDay;i++) row.appendChild(document.createElement('td'));
+      for(let day=1;day<=daysInMonth;day++){
+        if(row.children.length===7){tbody.appendChild(row);row=document.createElement('tr');}
+        const cell=document.createElement('td');
+        const dateStr=`${year}-${pad(month+1)}-${pad(day)}`;
+        cell.textContent=day;
+        if(dateStr===ymd(new Date())) cell.classList.add('today');
+        if(Array.isArray(serverData[dateStr])){
+          cell.classList.add('has-entry');
+          // sum P/L
+          const totalPL=serverData[dateStr].reduce((sum,e)=>{
+            return sum + ((parseFloat(e.value)||0)-(parseFloat(e.amount)||0));
+          },0);
+          if(totalPL>0) cell.classList.add('gain');
+          if(totalPL<0) cell.classList.add('loss');
+        }
+        cell.onclick=()=>openModal(dateStr);
+        row.appendChild(cell);
+      }
+      while(row.children.length<7) row.appendChild(document.createElement('td'));
+      tbody.appendChild(row);
+      document.getElementById('month-year').textContent=
+        new Date(year,month).toLocaleString('default',{month:'long',year:'numeric'});
+    }
+
+    // ——— Modal shows list + add form ———
+    function openModal(dateStr){
+      selectedDate=dateStr;
+      document.getElementById('modal-date').textContent=`Orders – ${dateStr}`;
+      const listDiv=document.getElementById('existing-entries');
+      listDiv.innerHTML='';
+      const entries=serverData[dateStr]||[];
+      if(entries.length){
+        const ul=document.createElement('ul');
+        entries.forEach((e,i)=>{
+          const li=document.createElement('li');
+          li.textContent=`[${e.type}] ${e.asset} – $${parseFloat(e.amount).toFixed(2)} → $${parseFloat(e.value).toFixed(2)}`;
+          const del=document.createElement('button');
+          del.textContent='×';
+          del.style.marginLeft='0.5rem';
+          del.onclick=()=>{ if(confirm('Delete this order?')){ deleteLocalEntry(dateStr,i); subscribeLocal(); openModal(dateStr);} };
+          li.appendChild(del);
+          ul.appendChild(li);
+        });
+        listDiv.appendChild(ul);
+      }
+      // clear form for new entry
+      document.getElementById('entry-form').reset();
+      document.getElementById('futures-fields').style.display='none';
+      document.getElementById('modal-bg').style.display='flex';
+    }
+    function closeModal(){
+      document.getElementById('modal-bg').style.display='none';
+    }
+    document.getElementById('modal-bg').onclick=e=>{ if(e.target.id==='modal-bg') closeModal(); };
+    document.getElementById('investment-type').onchange=function(){
+      document.getElementById('futures-fields').style.display=
+        this.value==='futures'?'grid':'none';
+    };
+
+    // Futures calculation (unchanged)
+    ['futures-entry','futures-exit','futures-contracts','futures-tickvalue','futures-commission']
+    .forEach(id=>{ document.getElementById(id).oninput=()=>{
+      const ent=+document.getElementById('futures-entry').value,
+            ex=+document.getElementById('futures-exit').value,
+            ct=+document.getElementById('futures-contracts').value,
+            tv=+document.getElementById('futures-tickvalue').value,
+            cm=+document.getElementById('futures-commission').value;
+      const pnl=( !isNaN(ent)&&!isNaN(ex)&&!isNaN(ct)&&!isNaN(tv) )
+        ? ((ex-ent)*ct*tv - cm) : 0;
+      document.getElementById('futures-pl').value=pnl.toFixed(2);
+    };});
+
+    // ——— Add new entry on submit ———
+    document.getElementById('entry-form').onsubmit=e=>{
+      e.preventDefault();
+      const type=document.getElementById('investment-type').value;
+      const asset=document.getElementById('entry-asset').value;
+      const amount=document.getElementById('entry-amount').value;
+      const value=document.getElementById('entry-value').value;
+      const notes=document.getElementById('entry-notes').value;
+      const entry={ type, asset, amount, value, notes };
+      if(type==='futures'){
+        entry.futures={
+          entryPrice:+document.getElementById('futures-entry').value,
+          exitPrice:+document.getElementById('futures-exit').value,
+          contracts:+document.getElementById('futures-contracts').value,
+          tickValue:+document.getElementById('futures-tickvalue').value,
+          commission:+document.getElementById('futures-commission').value,
+          pnl:+document.getElementById('futures-pl').value
+        };
+        entry.value=entry.futures.pnl;
+      }
+      saveLocal(selectedDate, entry);
+      subscribeLocal();
+      openModal(selectedDate); // refresh list
+    };
+
+    // ——— Chart now sums monthly values ———
+    let chartObj;
+    function renderChart(){
+      const labels=[], dataPoints=[];
+      for(let m=0;m<12;m++){
+        const monthKey=`${currentYear}-${pad(m+1)}`;
+        let sum=0;
+        Object.entries(serverData).forEach(([ds,arr])=>{
+          if(ds.startsWith(monthKey)) arr.forEach(e=> sum+=parseFloat(e.value)||0);
+        });
+        labels.push(new Date(currentYear,m).toLocaleString('default',{month:'short'}));
+        dataPoints.push(sum);
+      }
+      if(chartObj) chartObj.destroy();
+      const ctx=document.getElementById('progressChart').getContext('2d');
+      chartObj=new Chart(ctx,{
+        type:'line',
+        data:{ labels, datasets:[{ label:'Total Value', data:dataPoints, fill:true, tension:0.4 }]},
+        options:{ plugins:{ legend:{ display:false }}, scales:{ y:{ beginAtZero:true }} }
+      });
+    }
+
+    // ——— Init ———
+    const today=new Date();
+    currentMonth=today.getMonth();
+    currentYear=today.getFullYear();
+    subscribeLocal();
+    document.getElementById('prev-month').onclick=()=>{
+      if(currentMonth===0){ currentMonth=11; currentYear--; }
+      else currentMonth--;
+      renderCalendar(currentMonth,currentYear);
+    };
+    document.getElementById('next-month').onclick=()=>{
+      if(currentMonth===11){ currentMonth=0; currentYear++; }
+      else currentMonth++;
+      renderCalendar(currentMonth,currentYear);
+    };
+  </script>
+</body>
+</html>
