@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ES Futures Tracker</title>
+  <link rel="stylesheet" href="css/styles2.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>YD</h2>
+    <nav>
+      <ul>
+        <li><a href="#" class="active" id="nav-dashboard">Dashboard</a></li>
+        <li><a href="#" id="nav-calendar">Calendar</a></li>
+        <li><a href="#" id="nav-history">History</a></li>
+      </ul>
+    </nav>
+    <button id="theme-toggle" title="Toggle dark mode">🌙</button>
+  </aside>
+  <main class="main-content">
+    <!-- Initial Investment -->
+    <section class="investment-section">
+      <label>
+        Initial Investment: 
+        <input type="number" id="initial-investment-input" min="0" step="0.01" />
+        <button id="save-investment-btn">Save</button>
+      </label>
+      <span id="current-investment"></span>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard-section">
+      <h1>Daily Summary</h1>
+      <div class="summary-cards">
+        <div class="card">
+          <h3>P&L Today</h3>
+          <p id="summary-pnl">$0.00</p>
+        </div>
+        <div class="card">
+          <h3>Win Rate</h3>
+          <p id="summary-winrate">0%</p>
+        </div>
+        <div class="card">
+          <h3>Profit Factor</h3>
+          <p id="summary-pf">0.00</p>
+        </div>
+        <div class="card">
+          <h3>Streak</h3>
+          <p id="summary-streak">0</p>
+        </div>
+        <div class="card">
+          <h3>Total Balance</h3>
+          <p id="summary-balance">$0.00</p>
+        </div>
+      </div>
+      <button id="add-trade-btn">+ Add Trade</button>
+      <ul id="trade-list"></ul>
+    </section>
+
+    <!-- History -->
+    <section id="history-section" style="display:none;">
+      <h1>Trade History</h1>
+      <div style="margin-bottom: 1.4rem;">
+        <button id="export-csv-btn" class="export-btn">⬇️ Export CSV</button>
+        <!-- You can add a PDF button here later if you wish -->
+      </div>
+      <table id="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Side</th>
+            <th>Entry Time</th>
+            <th>Exit Time</th>
+            <th>Entry</th>
+            <th>Exit</th>
+            <th>Contracts</th>
+            <th>Points</th>
+            <th>P/L</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- JS will populate trades here -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Calendar -->
+    <section id="calendar-section" style="display:none;">
+      <h1>P&L Calendar</h1>
+      <div id="calendar-stats"></div>
+      <div id="calendar"></div>
+      <div style="margin-top:2.5rem;">
+        <canvas id="calendar-chart" height="110"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <form id="trade-form" class="modal-content">
+      <h2 id="modal-title">Add Trade</h2>
+      <label>Date <input type="date" id="trade-date" required></label>
+      <label>Side
+        <select id="trade-side" required>
+          <option value="long">Long</option>
+          <option value="short">Short</option>
+        </select>
+      </label>
+      <label>Entry <input type="number" id="trade-entry" required></label>
+      <label>Entry Time <input type="time" id="trade-entry-time" required></label>
+      <label>Exit <input type="number" id="trade-exit" required></label>
+      <label>Exit Time <input type="time" id="trade-exit-time" required></label>
+      <label>Contracts <input type="number" id="trade-contracts" value="1" min="1" required></label>
+      <button type="submit">Save</button>
+      <button type="button" id="modal-cancel">Cancel</button>
+    </form>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
