@@ -2,50 +2,412 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard | YoungDesert</title>
-  <link rel="stylesheet" href="css/styles1.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YoungTracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #1a1a1a;
+      --accent: #00ffd5;
+      --text: #eaeaea;
+      --gain: #4caf50;
+      --loss: #f44336;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      color: var(--accent);
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 255, 213, 0.1);
+      margin-bottom: 2rem;
+    }
+    .calendar-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .calendar-controls button {
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+    .calendar-day {
+      padding: 0.75rem;
+      border-radius: 8px;
+      background: #121212;
+      cursor: pointer;
+    }
+    .calendar-day.today {
+      outline: 2px solid var(--accent);
+      font-weight: bold;
+    }
+    .calendar-day.gain {
+      background-color: var(--gain);
+      color: #000;
+    }
+    .calendar-day.loss {
+      background-color: var(--loss);
+      color: #000;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+    }
+    .close-btn {
+      background: #f44336;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      float: right;
+      cursor: pointer;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      background: #121212;
+      color: var(--text);
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+    }
+    button {
+      margin-top: 2rem;
+      background-color: var(--accent);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #00e6c1;
+    }
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 1rem;
+      padding-bottom: 1rem;
+    }
+    .trade-card {
+      min-width: 300px;
+      flex-shrink: 0;
+      background-color: #121212;
+      border-radius: 10px;
+      padding: 1rem;
+      scroll-snap-align: start;
+      box-shadow: 0 0 10px rgba(0,255,213,0.1);
+    }
+    .gain { color: var(--gain); }
+    .loss { color: var(--loss); }
+    .totals {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+    .download-btn {
+      margin-top: 1rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .delete-btn {
+      margin-top: 1rem;
+      background: #f44336;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    @media (max-width: 600px) {
+      .calendar-grid, .calendar-weekdays {
+        font-size: 0.75rem;
+      }
+      .trade-card {
+        min-width: 90%;
+      }
+    }
+  </style>
 </head>
-<body class="dashboard-page">
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="dashboard.html" class="logo">YoungDesert</a>
-      <nav class="site-nav">
-        <a href="dashboard.html" class="active">Dashboard</a>
-        <a href="#">Settings</a>
-      </nav>
-     <button id="logout-btn" class="btn btn-logout">Log Out</button>
+<body>
+  <div class="container">
+    <header>
+      <h1>YoungTrader – ES Futures Tracker</h1>
+      <p style="opacity: 0.7">Click a day to register or view trades</p>
+    </header>
 
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="hero">
-      <h1>Dashboard</h1>
-      <p>Welcome, <span id="user-email"></span>!</p>
-    </section>
-
-    <!-- Quick Actions -->
-    <div class="guide-checklist">
-      <h2>Your Quick Actions</h2>
-      <ul>
-        <li><a href="#">View Profile</a></li>
-        <li><a href="#">Manage Subscriptions</a></li>
-        <li><a href="#">Account Settings</a></li>
-      </ul>
-    </div>
-
-    <!-- Uploaded Videos Section -->
-    <section class="video-dashboard">
-      <h2>Uploaded Videos</h2>
-      <div id="video-list" class="video-list">
-        <!-- Videos will be dynamically inserted here -->
+    <div class="card">
+      <div class="calendar-controls">
+        <button onclick="prevMonth()">⬅</button>
+        <h3 id="monthLabel"></h3>
+        <button onclick="nextMonth()">➡</button>
       </div>
-    </section>
-  </main>
+      <div class="calendar-weekdays">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
 
-  <!-- Auth and dashboard logic -->
-  <script src="js/auth.js"></script>
-  <script src="js/dashboard.js"></script>
+    <div class="modal" id="tradeModal">
+      <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">Close</button>
+        <h2>Register Trade</h2>
+        <form id="tradeForm">
+          <label for="date">Date</label>
+          <input type="date" id="date" required />
+
+          <label for="entry">Entry Price</label>
+          <input type="number" id="entry" step="0.25" inputmode="decimal" required />
+
+          <label for="exit">Exit Price</label>
+          <input type="number" id="exit" step="0.25" inputmode="decimal" required />
+
+          <label for="contracts">Contracts</label>
+          <input type="number" id="contracts" min="1" value="1" inputmode="numeric" required />
+
+          <label for="strategy">Strategy</label>
+          <input type="text" id="strategy" />
+
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="3"></textarea>
+
+          <button type="submit">Add Trade</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Trade History</h2>
+      <div class="carousel" id="tradeCarousel"></div>
+      <div class="totals" id="totalsDisplay"></div>
+      <button class="download-btn" onclick="downloadCSV()">Download CSV</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('tradeForm');
+    const tradeCarousel = document.getElementById('tradeCarousel');
+    const totalsDisplay = document.getElementById('totalsDisplay');
+    const modal = document.getElementById('tradeModal');
+    const dateInput = document.getElementById('date');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const monthLabel = document.getElementById('monthLabel');
+
+    const COMMISSION = 4.00;
+    const POINT_VALUE = 50;
+
+    let trades = JSON.parse(localStorage.getItem('trades_es')) || [];
+    let currentDate = new Date();
+    let currentYear = currentDate.getFullYear();
+    let currentMonth = currentDate.getMonth();
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    function openModalWithDate(date) {
+      dateInput.value = date;
+      modal.style.display = 'flex';
+      document.getElementById('entry').focus();
+    }
+
+    function generateCalendar() {
+      calendarGrid.innerHTML = '';
+      const year = currentYear;
+      const month = currentMonth;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      monthLabel.textContent = new Date(year, month).toLocaleString('default', {
+        month: 'long', year: 'numeric'
+      });
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        const empty = document.createElement('div');
+        calendarGrid.appendChild(empty);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const trade = trades.find(t => t.date === dateStr);
+
+        let cls = 'calendar-day';
+        if (dateStr === todayStr) cls += ' today';
+        if (trade) {
+          const result = (trade.exit - trade.entry) * POINT_VALUE * trade.contracts;
+          cls += result >= 0 ? ' gain' : ' loss';
+        }
+
+        const day = document.createElement('div');
+        day.className = cls;
+        day.textContent = d;
+        day.onclick = () => openModalWithDate(dateStr);
+        calendarGrid.appendChild(day);
+      }
+    }
+
+    function prevMonth() {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      generateCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      generateCalendar();
+    }
+
+    function render() {
+      generateCalendar();
+      tradeCarousel.innerHTML = '';
+      let totalPL = 0;
+      let totalNet = 0;
+      let totalCommission = 0;
+
+      const sorted = [...trades].sort((a, b) => new Date(b.date) - new Date(a.date));
+      sorted.forEach((t, index) => {
+        const result = (t.exit - t.entry) * POINT_VALUE * t.contracts;
+        const commission = t.contracts * COMMISSION;
+        const net = result - commission;
+
+        totalPL += result;
+        totalCommission += commission;
+        totalNet += net;
+
+        const card = document.createElement('div');
+        card.className = 'trade-card';
+        card.innerHTML = `
+          <h4>${t.date}</h4>
+          <p><strong>Entry:</strong> ${t.entry}</p>
+          <p><strong>Exit:</strong> ${t.exit}</p>
+          <p><strong>Contracts:</strong> ${t.contracts}</p>
+          <p><strong>P/L:</strong> <span class="${result >= 0 ? 'gain' : 'loss'}">$${result.toFixed(2)}</span></p>
+          <p><strong>Commissions:</strong> $${commission.toFixed(2)}</p>
+          <p><strong>Net:</strong> <span class="${net >= 0 ? 'gain' : 'loss'}">$${net.toFixed(2)}</span></p>
+          <p><strong>Strategy:</strong> ${t.strategy || ''}</p>
+          <p><strong>Notes:</strong> ${t.notes || ''}</p>
+          <button class="delete-btn" onclick="deleteTrade(${index})">Delete</button>
+        `;
+        tradeCarousel.appendChild(card);
+      });
+
+      totalsDisplay.innerHTML = `
+        <p><strong>Total P/L:</strong> $${totalPL.toFixed(2)} | 
+        <strong>Total Commissions:</strong> $${totalCommission.toFixed(2)} | 
+        <strong>Total Net:</strong> $${totalNet.toFixed(2)}</p>
+      `;
+    }
+
+    function deleteTrade(index) {
+      if (confirm('Are you sure you want to delete this trade?')) {
+        trades.splice(index, 1);
+        localStorage.setItem('trades_es', JSON.stringify(trades));
+        render();
+      }
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const trade = {
+        date: form.date.value,
+        entry: parseFloat(form.entry.value),
+        exit: parseFloat(form.exit.value),
+        contracts: parseInt(form.contracts.value),
+        strategy: form.strategy.value,
+        notes: form.notes.value
+      };
+      trades.push(trade);
+      localStorage.setItem('trades_es', JSON.stringify(trades));
+      render();
+      form.reset();
+      closeModal();
+    });
+
+    function downloadCSV() {
+      let csv = 'Date,Entry,Exit,Contracts,P/L,Commissions,Net,Strategy,Notes\n';
+      trades.forEach(t => {
+        const result = (t.exit - t.entry) * POINT_VALUE * t.contracts;
+        const commission = t.contracts * COMMISSION;
+        const net = result - commission;
+        csv += `${t.date},${t.entry},${t.exit},${t.contracts},${result.toFixed(2)},${commission.toFixed(2)},${net.toFixed(2)},${t.strategy},${t.notes}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'es_trades.csv';
+      link.click();
+    }
+
+    render();
+  </script>
 </body>
 </html>
